@@ -1,3 +1,4 @@
+// Package output provides functions for outputting results.
 package output
 
 import (
@@ -7,16 +8,19 @@ import (
 	"path/filepath"
 )
 
+// Output represents an output destination.
 type Output struct {
 	FolderPath string
 }
 
+// NewOutput creates a new Output with the provided folder path.
 func NewOutput(folderPath string) *Output {
 	return &Output{
 		FolderPath: folderPath,
 	}
 }
 
+// deleteEmpty recursively deletes all empty values from a map.
 func (o *Output) deleteEmpty(mapData map[string]interface{}) {
 	for key, value := range mapData {
 		switch v := value.(type) {
@@ -28,6 +32,9 @@ func (o *Output) deleteEmpty(mapData map[string]interface{}) {
 			delete(mapData, key)
 		case map[string]interface{}:
 			o.deleteEmpty(v)
+			if len(v) == 0 { // If the nested map is empty after deletion, remove it from the map
+				delete(mapData, key)
+			}
 		case []interface{}:
 			for i, item := range v {
 				if itemMap, ok := item.(map[string]interface{}); ok {
@@ -42,6 +49,8 @@ func (o *Output) deleteEmpty(mapData map[string]interface{}) {
 			} else {
 				mapData[key] = v // Update the array in the original map
 			}
+		default:
+			// For all other data types, do nothing.
 		}
 	}
 }
@@ -52,7 +61,7 @@ func (o *Output) SaveJSON(filename string, data interface{}) error {
 	newDir := o.FolderPath
 	err := os.MkdirAll(newDir, 0755)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating directory: %w", err)
 	}
 
 	baseName := filepath.Base(filename)
@@ -68,7 +77,7 @@ func (o *Output) SaveJSON(filename string, data interface{}) error {
 	} else if dataStr, ok := data.(string); ok {
 		err := json.Unmarshal([]byte(dataStr), &jsonData)
 		if err != nil {
-			return err
+			return fmt.Errorf("error unmarshalling JSON: %w", err)
 		}
 	} else {
 		return fmt.Errorf("invalid data type for SaveJSON")
@@ -83,12 +92,12 @@ func (o *Output) SaveJSON(filename string, data interface{}) error {
 
 	formattedJson, err := json.MarshalIndent(jsonData, "", "  ")
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
 	jsonFile, err := os.Create(jsonFileName)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating JSON file: %w", err)
 	}
 	defer jsonFile.Close()
 
@@ -100,9 +109,6 @@ func (o *Output) SaveJSON(filename string, data interface{}) error {
 
 // DisplayResults formats and displays the OCR processing results to the user.
 func DisplayResults(text string) {
-	// Display the extracted text
 	fmt.Println("Extracted Text:")
 	fmt.Println(text)
-
-	// You can add more formatting and display options as needed
 }
