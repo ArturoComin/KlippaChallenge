@@ -64,7 +64,7 @@ This command builds a Docker image using the Dockerfile in the current directory
 
 To run the Docker image, use the following command:
 
->docker run -v /path/to/pdf/files:/app/pdf_files -v /path/to/config.json:/app/config.json klippa-ocr-challenge
+>docker run -v path\to\docs:/app/Docs -v path\to\outputs:/app/json-outputs klippa-app ./main -api-key="" -template= -monitoring=true -pdf-extraction=fast -output-json=true -dir-path="Docs"
 
 This command runs the `klippa-ocr-challenge` Docker image. The `-v` flag is used to mount your local directories or files into the Docker container. Replace `/path/to/pdf/files` with the path to the directory containing your PDF files, and replace `/path/to/config.json` with the path to your configuration file.
 
